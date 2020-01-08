@@ -8,12 +8,24 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include "helper/wulkanat/debug.h"
+#include "helper/wulkanat/commander.h"
+#include "helper/wulkanat/descriptive_types.h"
 
-int main (int argc, char ** argv) {
-	if (argc < 3) {
-		printf("Error to few arguments.\nUsage: client <ip/host name> <port>\n");
-		exit(1);
-	}
+typedef struct __attribute__((packed)) {
+    byte32 header;
+    byte32 root_delay;
+    byte32 root_dispersion;
+    byte32 reference_id;
+    byte64 reference_timestamp;
+    byte64 origin_timestamp;
+    byte64 receive_timestamp;
+    byte64 transmit_timestamp;
+} RawTimeserverProtocol;
+
+DEBUGGABLE_MAIN(argc, argv)
+    STR_ARG(address, 0)
+    STR_ARG(port, 1)
 
 	struct addrinfo *server_addr;
 	struct addrinfo hint;
@@ -22,13 +34,13 @@ int main (int argc, char ** argv) {
 	hint.ai_family = AF_UNSPEC;
 	hint.ai_socktype = SOCK_STREAM;
 
-	int err = getaddrinfo(argv[1], argv[2], &hint, &server_addr);
-	if (err != 0) {
-		perror("Error while getting server address info");
+	int32 err = getaddrinfo(address, port, &hint, &server_addr);
+	if (err != false) {
+		ERROR("Error while getting server address info");
 		exit(1);
 	}
 
-	int client;
+	int32 client;
 
 	/* Iterate over the provided addresses and try to establish a connection */
 	for (struct addrinfo *cur_info = server_addr; cur_info != NULL; cur_info = cur_info->ai_next) {	
@@ -37,12 +49,12 @@ int main (int argc, char ** argv) {
 		err = connect(client, cur_info->ai_addr, sizeof(*(cur_info->ai_addr)));
 		if (err == 0) break;
 		if (err == -1) {
-			perror("Error while connecting");
+			ERROR("Error while connecting");
 			close(client);
 			exit(1);
 		}
 		if (cur_info->ai_next == NULL) {
-			printf("Error could not connect to any service\n");
+			ERROR("Error could not connect to any service");
 			exit(1);
 		}
 
@@ -50,15 +62,15 @@ int main (int argc, char ** argv) {
 	}
 	freeaddrinfo(server_addr);
 
-	char buffer[512];
-	int bytes_received = 0;
+	RawTimeserverProtocol buffer;
+	int32 bytes_received = 0;
 
-	while ((bytes_received = recv(client, buffer, sizeof(buffer), 0)) != 0) {
+	while ((bytes_received = recv(client, &buffer, sizeof(buffer), 0)) != 0) {
 		if (bytes_received == -1) {
-			perror("Error while receiving message from server\n");
+			ERROR("Error while receiving message from server");
 			break;
 		}
-		fwrite(buffer, bytes_received, 1, stdout);
+		HEX_VALUE_LOG(&buffer, bytes_received)
 	}
 
 	close(client);
