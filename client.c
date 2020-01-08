@@ -62,6 +62,14 @@ DEBUGGABLE_MAIN(argc, argv)
 	}
 	freeaddrinfo(server_addr);
 
+
+	RawTimeserverProtocol request;
+	request.header = (3u << 5u) | (4u << 2u);
+	send(client, &request, sizeof(RawTimeserverProtocol), 1);
+
+
+
+
 	RawTimeserverProtocol buffer;
 	int32 bytes_received = 0;
 
