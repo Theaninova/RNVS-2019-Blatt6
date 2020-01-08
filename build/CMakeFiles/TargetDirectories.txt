@@ -1,4 +1,0 @@
-/mnt/c/Users/Ping/Documents/TU-Berlin/Wi.Ing/Module/RnVs/Blatt_06/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/Ping/Documents/TU-Berlin/Wi.Ing/Module/RnVs/Blatt_06/build/CMakeFiles/client.dir
-/mnt/c/Users/Ping/Documents/TU-Berlin/Wi.Ing/Module/RnVs/Blatt_06/build/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/Ping/Documents/TU-Berlin/Wi.Ing/Module/RnVs/Blatt_06/build/CMakeFiles/server.dir
